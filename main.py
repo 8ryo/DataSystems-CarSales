@@ -13,5 +13,8 @@ account_storage = os.environ.get('ACCOUNT_STORAGE')
 azureDB = AzureDB()
 azureDB.access_container("car-dataset")
 azureDB.list_blobs() 
-df = azureDB.access_blob_csv("car_prices.csv")
-print(df) 
+#azureDB.download_blob('car_prices.csv')
+#df = azureDB.access_blob_csv("car_prices.csv")
+#print(df) 
+
+
