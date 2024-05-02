@@ -1,0 +1,12 @@
+
+awscli
+boto3
+pyarrow
+pyodbc
+fastapi
+uvicorn[standard]
+pydantic
+azure-storage-blob
+azure-identity
+sqlalchemy
+python-dotenv
