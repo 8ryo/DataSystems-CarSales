@@ -2,27 +2,31 @@ import os, pyodbc
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
 import io
-from dotenv import load_dotenv 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, text
-import pandas as pd 
+import pandas as pd
+import json
 
-load_dotenv() 
+load_dotenv()
 
-username =  os.environ.get('USERNAME')
-password = os.environ.get("PASSWORD")
-server =  os.environ.get("SERVER")
-database = os.environ.get("DATABASE")
-account_storage = os.environ.get("ACCOUNT_STORAGE")
+
+# Replace these variables with your actual database credentials
+username = os.environ.get('USERNAME_AZURE')
+password = os.environ.get('PASSWORD')
+server = os.environ.get('SERVER')
+database = os.environ.get('DATABASE')
+account_storage = os.environ.get('ACCOUNT_STORAGE')
+connect_str = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 
 # Using pyodbc
 engine = create_engine(f'mssql+pyodbc://{username}:{password}@{server}/{database}?driver=ODBC+Driver+18+for+SQL+Server')
 
 class AzureDB():
-    def __init__ (self, local_path = "/data", account_storage = account_storage):
-        self.local_path =  local_path
+    def __init__(self, local_path = "./data", account_storage = account_storage):
+        self.local_path = local_path
         self.account_url = f"https://{account_storage}.blob.core.windows.net"
         self.default_credential = DefaultAzureCredential()
-        self.blob_service_client = BlobServiceClient(self.account_url, credential=self.default_credential) 
+        self.blob_service_client = BlobServiceClient.from_connection_string(connect_str)
         
     def access_container(self, container_name): 
         # Use this function to create/access a new container
@@ -116,4 +120,11 @@ class AzureDB():
             trans = con.begin()
             con.execute(text(f"DROP TABLE [dbo].[{table_name}]"))
             trans.commit()
+            
+    def get_sql_table(self, query):        
+        # Create connection and fetch data using Pandas        
+        df = pd.read_sql_query(query, engine)
+        # Convert DataFrame to the specified JSON format
+        result = df.to_dict(orient='records')
+        return result
             
